@@ -33,5 +33,28 @@ namespace ApiOAuthEmpleados.Repositories
             return await this.context.Empleados.Where(x => x.IdDepartamento == idDepartamento).ToListAsync();
         }
 
+
+        public async Task<List<string>> GetOficiosAsync()
+        {
+            var consulta = (from datos in this.context.Empleados select datos.Oficio).Distinct();
+            return await consulta.ToListAsync();
+        }
+
+        public async Task<List<Empleado>> GetEmpleadosByOficiosAsync(List<string> oficios)
+        {
+            var consulta = from datos in this.context.Empleados where oficios.Contains(datos.Oficio) select datos;
+            return await consulta.ToListAsync();
+        }
+
+        public async Task IncrementarSalariosAsync(int incremento, List<string> oficios)
+        {
+            List<Empleado> empleados = await this.GetEmpleadosByOficiosAsync(oficios);
+            foreach(Empleado emp in empleados)
+            {
+                emp.Salario += incremento;
+            }
+
+            await this.context.SaveChangesAsync();
+        }
     }
 }

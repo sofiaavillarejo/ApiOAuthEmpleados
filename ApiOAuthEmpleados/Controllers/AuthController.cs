@@ -42,8 +42,10 @@ namespace ApiOAuthEmpleados.Controllers
                 //CREAMOS UN ARRAY DE CLAIMS
                 Claim[] info = new[]
                 {
-                    new Claim("UserData", jsonEmpleado)
-                }; 
+                    new Claim("UserData", jsonEmpleado),
+                    new Claim(ClaimTypes.Role, emp.Oficio)
+                };
+                
                 //EL TOKEN SE GENERA CON UNA CLASE Y DEBEMOS INDICAR LOS DATOS QUE ALMACENARA EN SU INTERIOR
                 JwtSecurityToken token = new JwtSecurityToken(
                     claims: info,

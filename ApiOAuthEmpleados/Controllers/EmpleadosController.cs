@@ -36,31 +36,46 @@ namespace ApiOAuthEmpleados.Controllers
         [Authorize]
         [HttpGet]
         [Route("[action]")]
-        public async Task<ActionResult<Empleado>>
-    Perfil()
+        public async Task<ActionResult<Empleado>> Perfil()
         {
-            Claim claim = HttpContext.User.FindFirst
-                (z => z.Type == "UserData");
+            Claim claim = HttpContext.User.FindFirst(z => z.Type == "UserData");
             string json = claim.Value;
-            Empleado empleado = JsonConvert
-                .DeserializeObject<Empleado>(json);
-            return await
-                this.repo.FindEmpleadoAsync(empleado.IdEmpleado);
+            Empleado empleado = JsonConvert.DeserializeObject<Empleado>(json);
+            return await this.repo.FindEmpleadoAsync(empleado.IdEmpleado);
         }
 
-        [Authorize]
+        [Authorize(Roles = "PRESIDENTE")]//AHORA ENTRARAN SOLO LOS QUE TIENEN ESE OFICIO (PQ LO HEMOS CONFIGURADO ASI, POR OFICIOS)
         [HttpGet]
         [Route("[action]")]
-        public async Task<ActionResult<List<Empleado>>>
-            Compis()
+        public async Task<ActionResult<List<Empleado>>> Compis()
         {
-            string json = HttpContext.User.FindFirst
-                (x => x.Type == "UserData").Value;
-            Empleado empleado = JsonConvert
-                .DeserializeObject<Empleado>(json);
-            return await this.repo.GetCompisEmpleadoAsync
-                (empleado.IdDepartamento);
+            string json = HttpContext.User.FindFirst(x => x.Type == "UserData").Value;
+            Empleado empleado = JsonConvert.DeserializeObject<Empleado>(json);
+            return await this.repo.GetCompisEmpleadoAsync(empleado.IdDepartamento);
         }
 
+
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<ActionResult<List<string>>> Oficios()
+        {
+            return await this.repo.GetOficiosAsync();
+        }
+
+        //?oficio=ANALISTA&oficio=DIRECTOR
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<ActionResult<List<Empleado>>> EmpleadosOficios([FromQuery] List<string> oficio)
+        {
+            return await this.repo.GetEmpleadosByOficiosAsync(oficio);
+        }
+
+        [HttpPut]
+        [Route("[action]/{incremento}")]
+        public async Task<ActionResult> IncrementarSalarios (int incremento, [FromQuery] List<string> oficio)
+        {
+            await this.repo.IncrementarSalariosAsync(incremento, oficio);
+            return Ok();
+        }
     }
 }
