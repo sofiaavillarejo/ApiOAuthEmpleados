@@ -34,18 +34,27 @@ namespace ApiOAuthEmpleados.Controllers
             if (emp == null)
             {
                 return Unauthorized();
-            }else
+            }
+            else
             {
                 //DEBEMOS CREAR UNAS CREDENCIALES PARA INCLUIRLAS DENTRO DEL TOKEN Y QUE ESTARAN COMPUESTAS POR EL SECRET KEY CIFRADO Y EL TIPO DE CIFRADO QUE INCLUIREMOS EN EL TOKEN
                 SigningCredentials credentials = new SigningCredentials(this.helper.GetKeyToken(), SecurityAlgorithms.HmacSha256);
-                string jsonEmpleado = JsonConvert.SerializeObject(emp);
+                //CREAMOS EL PBJETO MODEL PARA LAMCENARLO DENTRO DEL TOKEN -> EN VD, PACO HARINA UNA VISTA EN LA BBDD Y AQUI EL METODO NOS DEVOLVERIA EmpleadoModel directamente
+                EmpleadoModel modelEmp = new EmpleadoModel();
+                modelEmp.IdEmpleado = emp.IdEmpleado;
+                modelEmp.Apellido = emp.Apellido;
+                modelEmp.Oficio = emp.Oficio;
+                modelEmp.IdDepartamento = emp.IdDepartamento;
+
+                string jsonEmpleado = JsonConvert.SerializeObject(modelEmp);
+                string jsonCifrado = HelperCryptography.EncryptString(jsonEmpleado);
                 //CREAMOS UN ARRAY DE CLAIMS
                 Claim[] info = new[]
                 {
-                    new Claim("UserData", jsonEmpleado),
+                    new Claim("UserData", jsonCifrado),//ahora la pagina de jwtio vera la info pero cifrada
                     new Claim(ClaimTypes.Role, emp.Oficio)
                 };
-                
+
                 //EL TOKEN SE GENERA CON UNA CLASE Y DEBEMOS INDICAR LOS DATOS QUE ALMACENARA EN SU INTERIOR
                 JwtSecurityToken token = new JwtSecurityToken(
                     claims: info,

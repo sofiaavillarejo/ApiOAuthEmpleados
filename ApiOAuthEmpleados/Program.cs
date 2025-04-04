@@ -5,6 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+HelperCryptography.Initialize(builder.Configuration);
+//INYECTAMOS HttpContextAccessor-> porq quiero acceder al usuario en clases q no sean del usuario
+builder.Services.AddHttpContextAccessor();
+
+
 //CREAMOS UNA INSTANCIA DE NUESTRO HELPER -> creado para quitar de aqui la configuracion y tenerla todo en un mismo sitio
 //SE DEBE CREAR SOLO UNA VEZ PARA QUE NUESTRA APP PUEDA VALIDAR TODO LO QUE HA CREADO
 HelperActionServicesOAuth helper = new HelperActionServicesOAuth(builder.Configuration);
